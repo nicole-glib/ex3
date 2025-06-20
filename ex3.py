@@ -82,7 +82,6 @@ class Hand:
     def reset(self):
         self.cards = []
 
-#TODO: Chip calculation after winning is messed up
     def get_value(self):
         total = 0
         aces = 0
@@ -116,7 +115,7 @@ class Player:
         if amount > self.chips:
             raise ValueError('Not enough chips to place this bet.')
         self.bet = amount
-        self.chips = amount
+        self.chips = self.chips - amount
 
     def add_card(self, card):
         self.hand.add_card(card)
@@ -296,11 +295,11 @@ class GameManager:
             print('You busted and lost your bet.')
         else:
             if dealer_bust or player_value > dealer_value:
-                self.player.chips = self.player.bet
+                self.player.chips =  self.player.chips + (self.player.bet * 2)
                 print(f'You win! You now have {self.player.chips} chips.')
             else:
                 if player_value == dealer_value:
-                    self.player.chips = self.player.bet
+                    self.player.chips = self.player.chips + self.player.bet
                     print(f'It\'s a tie. You get your bet back. Total chips: {self.player.chips}')
                 else:
                     print('You lost this round.')
@@ -311,13 +310,13 @@ class GameManager:
                 result = 'busted and lost.'
             else:
                 if dealer_bust or bot_value > dealer_value:
-                    bot.chips = bot.bet | 2
+                    bot.chips = bot.chips + bot.bet
                     result = f'won and now has {bot.chips} chips.'
-                else:  # inserted
+                else:
                     if bot_value == dealer_value:
                         bot.chips = bot.bet
                         result = f'tied and got their bet back. Total: {bot.chips} chips.'
-                    else:  # inserted
+                    else:
                         result = 'lost this round.'
             print(f'{bot.name} had {bot_value} → {result}')
 
@@ -326,6 +325,7 @@ class GameManager:
         all_players = [self.player] + self.bots
         chip_counts = [p.chips for p in all_players]
         chip_ratios = []
+        #TODO check if ratio works correctly
         for p in all_players:
             initial = p.total_chips_added if hasattr(p, 'total_chips_added') else p.chips
             ratio = p.chips + initial if initial > 0 else 0
