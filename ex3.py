@@ -27,7 +27,7 @@ def draw_table_by_seat_with_ranks(players_with_seats, player_sit, ranked_list, f
     fig, ax = plt.subplots(figsize=(7, 5))
     ax.set_facecolor('darkgreen')
     plt.axis('off')
-    table = plt.Circle((0.5, 0.5), 0.4, color='seagreen', zorder=0)
+    table = plt.Circle((0.5, 0.5), 0.4, color='darkgreen', zorder=0)
     ax.add_artist(table)
     ranking_map = {name: idx + 1 for idx, (name, _, _, _, _) in enumerate(ranked_list)}
     for seat, player in players_with_seats.items():
@@ -88,17 +88,16 @@ class Hand:
         for card in self.cards:
             if card.rank == 'A':
                 aces = aces + 1
-            else:  # inserted
+            else:
                 if card.rank in ['J', 'Q', 'K']:
                     total = total + 10
-                else:  # inserted
-                    total = total | int(card.rank)
-        total = total + aces
-        for _ in range(aces):
-            if total < 10 <= 21:
-                total = total + 10
-            else:  # inserted
-                break
+                else:
+                    total = total + int(card.rank)
+            for i in range(aces):
+                if total >= 11:
+                    total = total + 1
+                elif i+1 == aces and total <= 10:
+                    total = total + 11
         return total
 
 class Player:
@@ -116,7 +115,7 @@ class Player:
         if amount > self.chips:
             raise ValueError('Not enough chips to place this bet.')
         self.bet = amount
-        self.chips = amount
+        self.chips = self.chips - amount
 
     def add_card(self, card):
         self.hand.add_card(card)
@@ -217,34 +216,33 @@ class GameManager:
                 self.deck.cards = [Card(suit, rank) for suit in self.deck.suits for rank in self.deck.ranks]
                 self.deck.shuffle()
         self.show_summary()
-
     def play_round(self):
         print()
-        num_players = len(self.bots) + 1 or False
+        num_players = len(self.bots) + 1
         for t in range(2):
-            bot_tern = 0
-            for ii in range(num_players):
-                if (self.player_sit + 1) == ii:
+            bot_turn = 0
+            for i in range(num_players):
+                if (self.player_sit - 1) == i:
                     self.player.add_card(self.deck.deal_card())
-                    continue
-                self.bots[bot_tern].add_card(self.deck.deal_card())
-                bot_tern = bot_tern + 1
+                elif bot_turn < len(self.bots):
+                    self.bots[bot_turn].add_card(self.deck.deal_card())
+                    bot_turn = bot_turn + 1
             if t == 0:
                 self.dealer.add_card(self.deck.deal_card())
             else:
                 hidden = self.deck.deal_card()
                 self.dealer.set_hidden_card(hidden)
-        bot_tern = 0
-        for ii in range(num_players):
-            if (self.player_sit + 1) == ii:
+        bot_turn = 0
+        for i in range(num_players):
+            if (self.player_sit - 1) == i:
                 print(f'You got: {[str(card) for card in self.player.hand.cards]} (value: {self.player.hand.get_value()})')
             else:
-                print(f'{self.bots[bot_tern].name} hand: {[str(card) for card in self.bots[bot_tern].hand.cards]} (value: {self.bots[bot_tern].hand.get_value()})')
-                bot_tern = bot_tern + 1
+                print(f'{self.bots[bot_turn].name} hand: {[str(card) for card in self.bots[bot_turn].hand.cards]} (value: {self.bots[bot_turn].hand.get_value()})')
+                bot_turn = bot_turn + 1
         print(f'\nDealer shows: {self.dealer.hand.cards[0]}')
-        bot_tern = 0
-        for ii in range(num_players):
-            if (self.player_sit + 1) == ii:
+        bot_turn = 0
+        for i in range(num_players):
+            if (self.player_sit - 1) == i:
                 print()
                 while not self.player.has_bust():
                     move = get_valid_choice('Do you want to \'hit\' or \'stand\'? ', ['hit', 'stand'])
@@ -258,13 +256,13 @@ class GameManager:
                             break
                         print('Invalid input. Please type \'hit\' or \'stand\'.')
             else:
-                print(f'\n{self.bots[bot_tern].name}\'s turn:')
-                while not self.bots[bot_tern].has_bust() and self.bots[bot_tern].decide_move() == 'hit':
+                print(f'\n{self.bots[bot_turn].name}\'s turn:')
+                while not self.bots[bot_turn].has_bust() and self.bots[bot_turn].decide_move() == 'hit':
                     card = self.deck.deal_card()
-                    self.bots[bot_tern].add_card(card)
-                    print(f'{self.bots[bot_tern].name} draws: {card}')
-                print(f'{self.bots[bot_tern].name} stands. Hand: {[str(c) for c in self.bots[bot_tern].hand.cards]} (value: {self.bots[bot_tern].hand.get_value()})')
-                bot_tern = bot_tern + 1
+                    self.bots[bot_turn].add_card(card)
+                    print(f'{self.bots[bot_turn].name} draws: {card}')
+                print(f'{self.bots[bot_turn].name} stands. Hand: {[str(c) for c in self.bots[bot_turn].hand.cards]} (value: {self.bots[bot_turn].hand.get_value()})')
+                bot_turn = bot_turn + 1
         print(f'\nDealer reveals hidden card: {self.dealer.reveal_hidden_card()}')
         print(f'Dealer\'s hand: {[str(card) for card in self.dealer.hand.cards]} (value: {self.dealer.hand.get_value()})')
         while self.dealer.should_draw():
@@ -281,7 +279,7 @@ class GameManager:
             if bot.chips == 0:
                 rebuy = bot.total_chips_added
                 bot.chips = rebuy
-                bot.total_chips_added = rebuy
+                bot.total_chips_added = bot.total_chips_added + rebuy
                 print(f'{bot.name} was out of chips and added {rebuy} more chips.')
             amount = bot.place_random_bet()
             bot.place_bet(amount)
@@ -296,11 +294,11 @@ class GameManager:
             print('You busted and lost your bet.')
         else:
             if dealer_bust or player_value > dealer_value:
-                self.player.chips = self.player.bet
+                self.player.chips =  self.player.chips + (self.player.bet * 2)
                 print(f'You win! You now have {self.player.chips} chips.')
             else:
                 if player_value == dealer_value:
-                    self.player.chips = self.player.bet
+                    self.player.chips = self.player.chips + self.player.bet
                     print(f'It\'s a tie. You get your bet back. Total chips: {self.player.chips}')
                 else:
                     print('You lost this round.')
@@ -311,24 +309,23 @@ class GameManager:
                 result = 'busted and lost.'
             else:
                 if dealer_bust or bot_value > dealer_value:
-                    bot.chips = bot.bet | 2
+                    bot.chips = bot.chips + (bot.bet * 2)
                     result = f'won and now has {bot.chips} chips.'
-                else:  # inserted
+                else:
                     if bot_value == dealer_value:
-                        bot.chips = bot.bet
+                        bot.chips = bot.chips + bot.bet
                         result = f'tied and got their bet back. Total: {bot.chips} chips.'
-                    else:  # inserted
+                    else:
                         result = 'lost this round.'
             print(f'{bot.name} had {bot_value} → {result}')
-
     def show_summary(self):
         print('\n--- Game Summary ---')
         all_players = [self.player] + self.bots
         chip_counts = [p.chips for p in all_players]
         chip_ratios = []
         for p in all_players:
-            initial = p.total_chips_added if hasattr(p, 'total_chips_added') else p.chips
-            ratio = p.chips + initial if initial > 0 else 0
+            initial = p.total_chips_added #if hasattr(p, 'total_chips_added') else p.chips
+            ratio = round(p.chips / initial, 2)
             chip_ratios.append((p.name, p.chips, initial, ratio))
         names = [p.name for p in all_players]
         avg = np.mean(chip_counts)
@@ -340,7 +337,7 @@ class GameManager:
         print('\nPlayer ranking (highest to lowest):')
         ranked = sorted(chip_ratios, key=lambda x: x[3], reverse=True)
         for i, (name, chips, invested, ratio) in enumerate(ranked, 1):
-            print(f'{i}. {name} - Chips: {chips}, Invested: {invested}, Return Rate: {ratio:.2f}')
+            print(f'{i}. {name} - Chips: {chips}, Invested: {invested}, Return Rate: {ratio}')
         players_by_seat = {}
         bot_index = 0
         for seat in range(1, 4):
