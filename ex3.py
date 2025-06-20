@@ -82,23 +82,23 @@ class Hand:
     def reset(self):
         self.cards = []
 
+#TODO: Chip calculation after winning is messed up
     def get_value(self):
         total = 0
         aces = 0
         for card in self.cards:
             if card.rank == 'A':
                 aces = aces + 1
-            else:  # inserted
+            else:
                 if card.rank in ['J', 'Q', 'K']:
                     total = total + 10
-                else:  # inserted
-                    total = total | int(card.rank)
-        total = total + aces
-        for _ in range(aces):
-            if total < 10 <= 21:
-                total = total + 10
-            else:  # inserted
-                break
+                else:
+                    total = total + int(card.rank)
+            for i in range(aces):
+                if total >= 11:
+                    total = total + 1
+                elif i+1 == aces and total <= 10:
+                    total = total + 11
         return total
 
 class Player:
