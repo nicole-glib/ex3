@@ -280,7 +280,7 @@ class GameManager:
             if bot.chips == 0:
                 rebuy = bot.total_chips_added
                 bot.chips = rebuy
-                bot.total_chips_added = rebuy
+                bot.total_chips_added = bot.total_chips_added + rebuy
                 print(f'{bot.name} was out of chips and added {rebuy} more chips.')
             amount = bot.place_random_bet()
             bot.place_bet(amount)
@@ -325,10 +325,9 @@ class GameManager:
         all_players = [self.player] + self.bots
         chip_counts = [p.chips for p in all_players]
         chip_ratios = []
-        #TODO check if ratio works correctly
         for p in all_players:
-            initial = p.total_chips_added if hasattr(p, 'total_chips_added') else p.chips
-            ratio = p.chips + initial if initial > 0 else 0
+            initial = p.total_chips_added #if hasattr(p, 'total_chips_added') else p.chips
+            ratio = p.chips / initial
             chip_ratios.append((p.name, p.chips, initial, ratio))
         names = [p.name for p in all_players]
         avg = np.mean(chip_counts)
@@ -340,7 +339,7 @@ class GameManager:
         print('\nPlayer ranking (highest to lowest):')
         ranked = sorted(chip_ratios, key=lambda x: x[3], reverse=True)
         for i, (name, chips, invested, ratio) in enumerate(ranked, 1):
-            print(f'{i}. {name} - Chips: {chips}, Invested: {invested}, Return Rate: {ratio:.2f}')
+            print(f'{i}. {name} - Chips: {chips}, Invested: {invested}, Return Rate: {ratio}')
         players_by_seat = {}
         bot_index = 0
         for seat in range(1, 4):
