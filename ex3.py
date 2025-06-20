@@ -27,7 +27,7 @@ def draw_table_by_seat_with_ranks(players_with_seats, player_sit, ranked_list, f
     fig, ax = plt.subplots(figsize=(7, 5))
     ax.set_facecolor('darkgreen')
     plt.axis('off')
-    table = plt.Circle((0.5, 0.5), 0.4, color='seagreen', zorder=0)
+    table = plt.Circle((0.5, 0.5), 0.4, color='darkgreen', zorder=0)
     ax.add_artist(table)
     ranking_map = {name: idx + 1 for idx, (name, _, _, _, _) in enumerate(ranked_list)}
     for seat, player in players_with_seats.items():
@@ -216,34 +216,34 @@ class GameManager:
                 self.deck.cards = [Card(suit, rank) for suit in self.deck.suits for rank in self.deck.ranks]
                 self.deck.shuffle()
         self.show_summary()
-
+#TODO- fix error self.bots[bot_turn].add_card(self.deck.deal_card()) list index out of range
     def play_round(self):
         print()
-        num_players = len(self.bots) + 1 or False
+        num_players = len(self.bots) + 1
         for t in range(2):
-            bot_tern = 0
-            for ii in range(num_players):
-                if (self.player_sit + 1) == ii:
+            bot_turn = 0
+            for i in range(num_players):
+                if (self.player_sit - 1) == i:
                     self.player.add_card(self.deck.deal_card())
-                    continue
-                self.bots[bot_tern].add_card(self.deck.deal_card())
-                bot_tern = bot_tern + 1
+                elif bot_turn < len(self.bots):
+                    self.bots[bot_turn].add_card(self.deck.deal_card())
+                    bot_turn = bot_turn + 1
             if t == 0:
                 self.dealer.add_card(self.deck.deal_card())
             else:
                 hidden = self.deck.deal_card()
                 self.dealer.set_hidden_card(hidden)
-        bot_tern = 0
-        for ii in range(num_players):
-            if (self.player_sit + 1) == ii:
+        bot_turn = 0
+        for i in range(num_players):
+            if (self.player_sit - 1) == i:
                 print(f'You got: {[str(card) for card in self.player.hand.cards]} (value: {self.player.hand.get_value()})')
             else:
-                print(f'{self.bots[bot_tern].name} hand: {[str(card) for card in self.bots[bot_tern].hand.cards]} (value: {self.bots[bot_tern].hand.get_value()})')
-                bot_tern = bot_tern + 1
+                print(f'{self.bots[bot_turn].name} hand: {[str(card) for card in self.bots[bot_turn].hand.cards]} (value: {self.bots[bot_turn].hand.get_value()})')
+                bot_turn = bot_turn + 1
         print(f'\nDealer shows: {self.dealer.hand.cards[0]}')
-        bot_tern = 0
-        for ii in range(num_players):
-            if (self.player_sit + 1) == ii:
+        bot_turn = 0
+        for i in range(num_players):
+            if (self.player_sit - 1) == i:
                 print()
                 while not self.player.has_bust():
                     move = get_valid_choice('Do you want to \'hit\' or \'stand\'? ', ['hit', 'stand'])
@@ -257,13 +257,13 @@ class GameManager:
                             break
                         print('Invalid input. Please type \'hit\' or \'stand\'.')
             else:
-                print(f'\n{self.bots[bot_tern].name}\'s turn:')
-                while not self.bots[bot_tern].has_bust() and self.bots[bot_tern].decide_move() == 'hit':
+                print(f'\n{self.bots[bot_turn].name}\'s turn:')
+                while not self.bots[bot_turn].has_bust() and self.bots[bot_turn].decide_move() == 'hit':
                     card = self.deck.deal_card()
-                    self.bots[bot_tern].add_card(card)
-                    print(f'{self.bots[bot_tern].name} draws: {card}')
-                print(f'{self.bots[bot_tern].name} stands. Hand: {[str(c) for c in self.bots[bot_tern].hand.cards]} (value: {self.bots[bot_tern].hand.get_value()})')
-                bot_tern = bot_tern + 1
+                    self.bots[bot_turn].add_card(card)
+                    print(f'{self.bots[bot_turn].name} draws: {card}')
+                print(f'{self.bots[bot_turn].name} stands. Hand: {[str(c) for c in self.bots[bot_turn].hand.cards]} (value: {self.bots[bot_turn].hand.get_value()})')
+                bot_turn = bot_turn + 1
         print(f'\nDealer reveals hidden card: {self.dealer.reveal_hidden_card()}')
         print(f'Dealer\'s hand: {[str(card) for card in self.dealer.hand.cards]} (value: {self.dealer.hand.get_value()})')
         while self.dealer.should_draw():
@@ -319,7 +319,7 @@ class GameManager:
                     else:
                         result = 'lost this round.'
             print(f'{bot.name} had {bot_value} → {result}')
-
+#TODO the same seat give a different hand from the example
     def show_summary(self):
         print('\n--- Game Summary ---')
         all_players = [self.player] + self.bots
