@@ -224,7 +224,7 @@ class GameManager:
         for t in range(2):
             bot_tern = 0
             for ii in range(num_players):
-                if (self.player_sit + 1) == ii:
+                if (self.player_sit - 1) == ii:
                     self.player.add_card(self.deck.deal_card())
                     continue
                 self.bots[bot_tern].add_card(self.deck.deal_card())
@@ -236,7 +236,7 @@ class GameManager:
                 self.dealer.set_hidden_card(hidden)
         bot_tern = 0
         for ii in range(num_players):
-            if (self.player_sit + 1) == ii:
+            if (self.player_sit - 1) == ii:
                 print(f'You got: {[str(card) for card in self.player.hand.cards]} (value: {self.player.hand.get_value()})')
             else:
                 print(f'{self.bots[bot_tern].name} hand: {[str(card) for card in self.bots[bot_tern].hand.cards]} (value: {self.bots[bot_tern].hand.get_value()})')
@@ -244,7 +244,7 @@ class GameManager:
         print(f'\nDealer shows: {self.dealer.hand.cards[0]}')
         bot_tern = 0
         for ii in range(num_players):
-            if (self.player_sit + 1) == ii:
+            if (self.player_sit - 1) == ii:
                 print()
                 while not self.player.has_bust():
                     move = get_valid_choice('Do you want to \'hit\' or \'stand\'? ', ['hit', 'stand'])
