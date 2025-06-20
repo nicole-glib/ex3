@@ -2,7 +2,6 @@ import random
 import numpy as np
 import matplotlib.pyplot as plt
 
-#ABUV
 def get_valid_int(prompt, min_val=None, max_val=None):
     while True:
         user_input = input(prompt)
