@@ -216,7 +216,6 @@ class GameManager:
                 self.deck.cards = [Card(suit, rank) for suit in self.deck.suits for rank in self.deck.ranks]
                 self.deck.shuffle()
         self.show_summary()
-#TODO- fix error self.bots[bot_turn].add_card(self.deck.deal_card()) list index out of range
     def play_round(self):
         print()
         num_players = len(self.bots) + 1
@@ -319,7 +318,6 @@ class GameManager:
                     else:
                         result = 'lost this round.'
             print(f'{bot.name} had {bot_value} → {result}')
-
     def show_summary(self):
         print('\n--- Game Summary ---')
         all_players = [self.player] + self.bots
