@@ -310,16 +310,16 @@ class GameManager:
                 result = 'busted and lost.'
             else:
                 if dealer_bust or bot_value > dealer_value:
-                    bot.chips = bot.chips + bot.bet
+                    bot.chips = bot.chips + (bot.bet * 2)
                     result = f'won and now has {bot.chips} chips.'
                 else:
                     if bot_value == dealer_value:
-                        bot.chips = bot.bet
+                        bot.chips = bot.chips + bot.bet
                         result = f'tied and got their bet back. Total: {bot.chips} chips.'
                     else:
                         result = 'lost this round.'
             print(f'{bot.name} had {bot_value} → {result}')
-#TODO the same seat give a different hand from the example
+
     def show_summary(self):
         print('\n--- Game Summary ---')
         all_players = [self.player] + self.bots
@@ -327,7 +327,7 @@ class GameManager:
         chip_ratios = []
         for p in all_players:
             initial = p.total_chips_added #if hasattr(p, 'total_chips_added') else p.chips
-            ratio = p.chips / initial
+            ratio = round(p.chips / initial, 2)
             chip_ratios.append((p.name, p.chips, initial, ratio))
         names = [p.name for p in all_players]
         avg = np.mean(chip_counts)
