@@ -97,12 +97,12 @@ class Hand:
                     total = total + 10
                 else:
                     total = total + int(card.rank)
-                    # calculate the value of aces, only 1 ace can give 11 points because if it weren't this way, 2 would bust you
-            for i in range(aces):
-                if total >= 11:
-                    total = total + 1
-                elif i+1 == aces and total <= 10:
-                    total = total + 11
+        # calculate the value of aces, only 1 ace can give 11 points because if it weren't this way, 2 would bust you
+        for i in range(aces):
+            if total >= 11:
+                total = total + 1
+            elif i+1 == aces and total <= 10:
+                total = total + 11
         return total
 
 class Player:
