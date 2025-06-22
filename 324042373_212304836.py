@@ -331,7 +331,7 @@ class GameManager:
         chip_counts = [p.chips for p in all_players]
         chip_ratios = []
         for p in all_players:
-            initial = p.total_chips_added #if hasattr(p, 'total_chips_added') else p.chips
+            initial = p.total_chips_added
             ratio = round(p.chips / initial, 2)
             chip_ratios.append((p.name, p.chips, initial, ratio))
         names = [p.name for p in all_players]
@@ -353,7 +353,16 @@ class GameManager:
             else:
                 players_by_seat[seat] = self.bots[bot_index]
                 bot_index = bot_index + 1
-        ranked = sorted([(p.name, p.chips, p.total_chips_added, p.chips + p.total_chips_added if p.total_chips_added else 0, p == self.player) for p in [self.player] + self.bots], key=lambda x: x[3], reverse=True)
+        ranked = sorted(
+            [
+                (
+                    p.name,
+                    p.chips,
+                    p.total_chips_added,
+                    round(p.chips / p.total_chips_added, 5) if p.total_chips_added else 0, p == self.player) for p in [self.player] + self.bots
+            ],
+            key=lambda x: x[3], reverse=True
+        )
         draw_table_by_seat_with_ranks(players_by_seat, self.player_sit, ranked)
         print('Table image with seating and rankings saved as \'table_summary.png\'')
 
