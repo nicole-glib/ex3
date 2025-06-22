@@ -2,6 +2,7 @@ import random
 import numpy as np
 import matplotlib.pyplot as plt
 
+#make sure the user number inputs are legal
 def get_valid_int(prompt, min_val=None, max_val=None):
     while True:
         user_input = input(prompt)
@@ -14,6 +15,7 @@ def get_valid_int(prompt, min_val=None, max_val=None):
         except ValueError:
             print("Invalid input. Please enter a valid integer.")
 
+#make sure the user inputs are legal, used with yes/no and hit/stand
 def get_valid_choice(prompt, choices):
     choices = [c.lower() for c in choices]
     while True:
@@ -22,14 +24,16 @@ def get_valid_choice(prompt, choices):
             return choice
         print(f"Please enter one of the following: {', '.join(choices)}")
 
+#draw table_summery
 def draw_table_by_seat_with_ranks(players_with_seats, player_sit, ranked_list, filename='table_summary.png'):
     seat_positions = {1: (0.85, 0.5), 2: (0.5, 0.1), 3: (0.15, 0.5)}
     fig, ax = plt.subplots(figsize=(7, 5))
-    ax.set_facecolor('darkgreen')
+    ax.set_facecolor('seagreen')
     plt.axis('off')
-    table = plt.Circle((0.5, 0.5), 0.4, color='darkgreen', zorder=0)
+    table = plt.Circle((0.5, 0.5), 0.4, color='seagreen', zorder=0)
     ax.add_artist(table)
     ranking_map = {name: idx + 1 for idx, (name, _, _, _, _) in enumerate(ranked_list)}
+    # draw the correct player for each seat
     for seat, player in players_with_seats.items():
         name = player.name
         chips = player.chips
@@ -38,7 +42,7 @@ def draw_table_by_seat_with_ranks(players_with_seats, player_sit, ranked_list, f
         if is_human:
             label = f'You ({name})\n#{rank}\n{chips} chips'
             color = 'gold'
-        else:  # inserted
+        else:
             label = f'{name}\n#{rank}\n{chips} chips'
             color = 'blue' if seat!= player_sit and 'Bot1' in name else 'red'
         pos = seat_positions.get(seat, (0.5, 0.5))
@@ -93,6 +97,7 @@ class Hand:
                     total = total + 10
                 else:
                     total = total + int(card.rank)
+                    # calculate the value of aces, only 1 ace can give 11 points because if it weren't this way, 2 would bust you
             for i in range(aces):
                 if total >= 11:
                     total = total + 1
@@ -190,6 +195,7 @@ class GameManager:
         print('Nothing is left to chance when you are an engineer.')
         deck_seed = get_valid_int('Enter a seed value for the game: ')
         self.deck = Deck(seed=deck_seed)
+        #main game loop
         while True:
             print(f'\n{self.player.name}, you have {self.player.chips} chips.')
             if self.player.chips == 0:
@@ -198,7 +204,7 @@ class GameManager:
                     amount = get_valid_int('Enter amount of chips to add: ', min_val=100, max_val=1000)
                     self.player.chips = amount
                     self.player.total_chips_added += amount
-                else:  # inserted
+                else:
                     print('You chose to leave the table.')
                     break
             play = get_valid_choice('Do you want to play a round? (yes/no): ', ['yes', 'no'])
@@ -216,6 +222,7 @@ class GameManager:
                 self.deck.cards = [Card(suit, rank) for suit in self.deck.suits for rank in self.deck.ranks]
                 self.deck.shuffle()
         self.show_summary()
+    # blackjack round logic
     def play_round(self):
         print()
         num_players = len(self.bots) + 1
