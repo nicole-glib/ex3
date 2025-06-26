@@ -155,10 +155,10 @@ class Hand:
 
         # Handle aces: add them as 11 if possible without busting, otherwise as 1.
         for i in range(aces):
-            if total >= 11:
-                total = total + 1
-            elif i+1 == aces and total <= 10:
-                total = total + 11
+            if total + 11 <= 21 - (aces - 1):
+                total += 11
+            else:
+                total += 1
         return total
 
 class Player:
@@ -448,7 +448,7 @@ class GameManager:
         # Create a list of tuples with all data needed for ranking
         for p in all_players:
             initial = p.total_chips_added
-            ratio = round(p.chips / initial, 2)
+            ratio = f"{(p.chips / initial):.2f}"
             chip_ratios.append((p.name, p.chips, initial, ratio))
         names = [p.name for p in all_players]
         avg = np.mean(chip_counts)
@@ -479,7 +479,7 @@ class GameManager:
                     p.name,
                     p.chips,
                     p.total_chips_added,
-                    round(p.chips / p.total_chips_added, 5) if p.total_chips_added else 0, p == self.player) for p in [self.player] + self.bots
+                    p.chips / p.total_chips_added if p.total_chips_added else 0, p == self.player) for p in [self.player] + self.bots
             ],
             key=lambda x: x[3], reverse=True
         )
